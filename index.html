@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>塞特II 覺醒之力 AI選房系統</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    font-family:"Microsoft JhengHei",sans-serif;
+}
+
+body{
+    margin:0;
+    padding:0;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#0f172a,#1e293b,#111827);
+    color:white;
+}
+
+.container{
+    width:95%;
+    max-width:760px;
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.15);
+    border-radius:28px;
+    padding:40px;
+    backdrop-filter:blur(12px);
+    box-shadow:0 0 35px rgba(0,0,0,0.45);
+}
+
+h1{
+    margin:0;
+    text-align:center;
+    font-size:36px;
+    color:#facc15;
+    font-weight:800;
+}
+
+.subtitle{
+    text-align:center;
+    margin-top:12px;
+    margin-bottom:35px;
+    color:#cbd5e1;
+    font-size:18px;
+}
+
+.section-title{
+    font-size:18px;
+    font-weight:bold;
+    margin-bottom:12px;
+}
+
+.result-box{
+    width:100%;
+    height:95px;
+    border:none;
+    border-radius:18px;
+    background:#020617;
+    color:#22c55e;
+    font-size:42px;
+    font-weight:bold;
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.grid{
+    display:grid;
+    gap:18px;
+}
+
+.input-group label{
+    display:block;
+    margin-bottom:8px;
+    color:#e2e8f0;
+}
+
+.input-group input{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:14px;
+    background:#1e293b;
+    color:white;
+    font-size:16px;
+}
+
+.btn{
+    width:100%;
+    padding:18px;
+    margin-top:30px;
+    border:none;
+    border-radius:18px;
+    background:linear-gradient(135deg,#facc15,#f59e0b);
+    color:#111827;
+    font-size:20px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.btn.loading{
+    opacity:0.7;
+    pointer-events:none;
+}
+
+.password-screen{
+    position:fixed;
+    inset:0;
+    background:#020617;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+}
+
+.password-box{
+    width:90%;
+    max-width:420px;
+    background:#111827;
+    border-radius:24px;
+    padding:35px;
+    text-align:center;
+}
+
+.password-box h2{
+    color:#facc15;
+}
+
+.password-box input{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:14px;
+    background:#1e293b;
+    color:white;
+    margin-top:15px;
+}
+
+.error{
+    color:#ef4444;
+    margin-top:12px;
+}
+
+@media(max-width:640px){
+    .container{
+        padding:25px;
+    }
+
+    h1{
+        font-size:28px;
+    }
+
+    .result-box{
+        font-size:34px;
+    }
+}
+</style>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#5b167a">
+<link rel="apple-touch-icon" href="icon-192.png">
+</head>
+
+<body>
+
+<div class="password-screen" id="passwordScreen">
+    <div class="password-box">
+        <h2>請輸入密碼</h2>
+
+        <input type="password" id="passwordInput" placeholder="輸入密碼">
+
+        <button class="btn" onclick="checkPassword()">
+            進入系統
+        </button>
+
+        <div class="error" id="passwordError"></div>
+    </div>
+</div>
+
+<div class="container">
+
+    <h1>塞特II 覺醒之力 AI選房系統</h1>
+
+    <div class="subtitle">
+        DOIN經銷商W358專屬
+    </div>
+
+    <div class="section-title">
+        分析房號開出機率
+    </div>
+
+    <input
+        type="text"
+        class="result-box"
+        id="resultBox"
+        value="--.--%"
+        readonly
+    >
+
+    <div class="grid">
+
+        <div class="input-group">
+            <label>未開轉數分析</label>
+            <input type="text" id="input1" value="103">
+        </div>
+
+        <div class="input-group">
+            <label>前一轉開分析</label>
+            <input type="text" id="input2" value="30">
+        </div>
+
+        <div class="input-group">
+            <label>前二轉開分析</label>
+            <input type="text" id="input3" value="84">
+        </div>
+
+        <div class="input-group">
+            <label>得分率分析</label>
+            <input type="text" id="input4" value="110.52">
+        </div>
+
+        <div class="input-group">
+            <label>總下注額分析</label>
+            <input type="text" id="input5" value="17908.00">
+        </div>
+
+    </div>
+
+    <button class="btn" id="analyzeBtn" onclick="startAnalyze()">
+        開始計算
+    </button>
+
+</div>
+
+<script>
+
+function checkPassword(){
+    const password = document.getElementById('passwordInput').value;
+    const error = document.getElementById('passwordError');
+
+    if(password === 'aaa888'){
+        document.getElementById('passwordScreen').style.display = 'none';
+    }else{
+        error.innerText = '密碼錯誤';
+    }
+}
+
+document.getElementById('passwordInput').addEventListener('keypress',function(e){
+    if(e.key === 'Enter'){
+        checkPassword();
+    }
+});
+
+function isNumeric(value){
+    return !isNaN(value) && value.trim() !== '';
+}
+
+function generateDeterministicPercent(values){
+
+    const combined = values.join('|');
+
+    let hash = 0;
+
+    for(let i = 0; i < combined.length; i++){
+        hash = combined.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    const normalized = Math.abs(hash % 200);
+
+    const percent = (75 + normalized / 10).toFixed(1);
+
+    return percent + '%';
+}
+
+function startAnalyze(){
+
+    const inputs = [
+        document.getElementById('input1').value,
+        document.getElementById('input2').value,
+        document.getElementById('input3').value,
+        document.getElementById('input4').value,
+        document.getElementById('input5').value
+    ];
+
+    for(let i = 0; i < inputs.length; i++){
+
+        const value = inputs[i].replace(/,/g,'');
+
+        if(!isNumeric(value)){
+            alert('五個欄位都必須輸入數字');
+            return;
+        }
+    }
+
+    const btn = document.getElementById('analyzeBtn');
+    const resultBox = document.getElementById('resultBox');
+
+    btn.classList.add('loading');
+    btn.innerText = '分析計算中...';
+
+    resultBox.value = 'AI分析中...';
+
+    setTimeout(()=>{
+
+        resultBox.value = generateDeterministicPercent(inputs);
+
+        btn.classList.remove('loading');
+        btn.innerText = '開始計算';
+
+    },8000);
+}
+
+</script>
+
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));}</script>
+</body>
+</html>
